@@ -102,8 +102,8 @@ app.on('ready', () => {
   if (process.env.NODE_ENV === 'production') {
     autoUpdater.logger = log
     autoUpdater.logger.transports.file.level = 'info'
-    // autoUpdater.checkForUpdatesAndNotify()
-    autoUpdater.checkForUpdates()
+    autoUpdater.checkForUpdatesAndNotify()
+    // autoUpdater.checkForUpdates()
   }
 })
 

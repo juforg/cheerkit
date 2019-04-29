@@ -1,7 +1,7 @@
 {
   "name": "cheerkit",
   "productName": "程序员鼓励师",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "juforg <juforg@sina.com> (http://blog.appcity.vip)",
   "description": "程序员鼓励师programming cheerleaders",
   "keywords": [
@@ -24,7 +24,8 @@
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "postinstall": "npm run lint:fix",
-    "publish": "electron-builder --publish onTagOrDraft"
+    "publish": "electron-builder --publish always",
+    "release": "electron-builder --publish always"
   },
   "repository": "github:juforg/cheerkit",
   "homepage": "https://github.com/juforg/cheerkit#readme",

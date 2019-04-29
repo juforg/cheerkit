@@ -2,7 +2,8 @@
 
 > 程序员鼓励师programming cheerleaders
 
-Travis: ![](https://travis-ci.org/juforg/cheerkit.svg?branch=master)
+Travis: [![Build Status](https://travis-ci.org/juforg/cheerkit.svg?branch=master)](https://travis-ci.org/juforg/cheerkit)
+
 Appveyor: [![Build status](https://ci.appveyor.com/api/projects/status/hdp6df0ylejmv27j?svg=true)](https://ci.appveyor.com/project/juforg/cheerkit)
 
 #### Build Setup
