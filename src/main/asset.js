@@ -57,7 +57,7 @@ class Asset {
     var len = str.length
     var tmp1 = str.substr(str.lastIndexOf('_') + 1, len)
     var tmp2 = tmp1.substr(0, tmp1.lastIndexOf('.'))
-    return tmp2.split('*')
+    return tmp2.split('X')
   }
 }
 export default new Asset()
