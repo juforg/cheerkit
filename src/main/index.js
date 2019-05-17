@@ -8,7 +8,7 @@ import { ebtMain } from 'electron-baidu-tongji'
 import analytics from './analyticsProvider'
 import * as util from 'electron-util'
 import { autoUpdater } from 'electron-updater'
-
+import Asset from './asset.js'
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -47,14 +47,13 @@ function createWindow () {
 
   mainWindow = new BrowserWindow({
     // alwaysOnTop: true, // 窗口是否永远在别的窗口的上面
-    height: 563,
+    height: 400,
     center: true,
     useContentSize: true,
-    width: 1000,
+    width: 714,
     title: '程序员鼓励师',
     resizable: false,
     // backgroundColor: '#eee',
-    // autoHideMenuBar: true,
     show: false,
     maximizable: false,
     minimizable: false,
@@ -69,6 +68,7 @@ function createWindow () {
   })
 
   mainWindow.loadURL(winURL)
+
   // app.setName('程序员鼓励师')
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
@@ -99,30 +99,36 @@ app.on('ready', () => {
   }
   tray.init()
 
-  if (process.env.NODE_ENV === 'production') {
-    autoUpdater.logger = log
-    autoUpdater.logger.transports.file.level = 'info'
-    autoUpdater.checkForUpdatesAndNotify()
-    // autoUpdater.checkForUpdates()
-  }
+  // if (process.env.NODE_ENV === 'production') {
+  autoUpdater.logger = log
+  autoUpdater.logger.transports.file.level = 'info'
+  autoUpdater.checkForUpdatesAndNotify()
+  // autoUpdater.checkForUpdates()
+  // }
 })
 
-// ipcMain.on('reload_res', (event, arg) => {
-//   log.info('reload_res: ' + arg) //
-//   // event.sender.send('asynchronous-reply', 'pong')
-// })
 ipcMain.on('asynchronous-message', (event, arg) => {
-  log.info(' 2 ' + arg) // prints "ping"
+  log.info(' 2 ' + arg)
   event.sender.send('asynchronous-reply', 'rep pong')
 })
 ipcMain.on('synchronous-message', (event, arg1, arg2) => {
-  log.info('1 ' + arg1 + arg2) // prints "ping"
-  // mainWindow.center()
-  // mainWindow.moveToTop()
-  // util.centerWindow({ window: mainWindow, size: { width: 549, height: 510 }})
-  // mainWindow.setSize(arg1, arg2)
-  // mainWindow.webContents.reload()
+  log.info('1 ' + arg1 + arg2)
   event.returnValue = 'pong'
+})
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+  analytics.setEvent('main', 'quit', 'quittime', Date.now())
+})
+
+app.on('activate', () => {
+  if (mainWindow === null) {
+    createWindow()
+    randomRes()
+    log.info('conf.cheerPeriod', settings.get('conf.cheerPeriod', 2))
+  }
 })
 
 function initSetting () {
@@ -138,18 +144,81 @@ function initSetting () {
     lang: app.getLocale()
   })
 }
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
+
+var cheerUrl = path.join('static', 'all', 'l2', 'a_l2_gif_字符画-kis_714*400.gif')
+var intervalId = 0
+var imgwidth = 714
+var imgheight = 400
+
+function startCheer () {
+  log.info('show' + Date.now())
+  var duration = randomRes()
+  app.show()
+  mainWindow.restore()
+  if (process.platform === 'darwin') {
+
+  } else if (process.platform === 'win32') {
   }
-  analytics.setEvent('main', 'quit', 'quittime', Date.now())
+  setTimeout(() => {
+    // log.info('hide' + Date.now())
+    app.hide()
+    mainWindow.minimize()
+  }, duration)
+}
+
+function randomRes () {
+  var cheerLevel = settings.get('conf.cheerLevel', 'l1')
+  var targetsexSubs = settings.get('conf.targetsexSubs')
+  var duration = 3000
+  var sexs = []
+  for (var key in targetsexSubs) {
+    if (targetsexSubs[key] === 'y') {
+      sexs.push(key)
+    }
+  }
+  var relurl = Asset.getResourcesUri(sexs, cheerLevel)
+  if (relurl) {
+    cheerUrl = path.join('static', relurl)
+    log.info('cheerurl:' + cheerUrl)
+    var si = Asset.getImgSize(relurl)
+    // log.info('si:' + si[0])
+    imgwidth = si[0]
+    imgheight = si[1]
+    if (si.length > 2) {
+      duration = Number(si[2]) * 1000
+    }
+    mainWindow.setSize(Number(imgwidth) + 15, Number(imgheight) + 15)
+    mainWindow.center()
+    // log.info('image size :' + imgwidth + '|' + imgheight)
+    mainWindow.webContents.send('change-res', cheerUrl, imgwidth, imgheight)
+    // mainWindow.webContents.reload()
+  }
+  analytics.setEvent('main', 'cheerup', 'cheerpage', relurl)
+  return duration
+}
+function createSchedule (cheerPeriod) {
+  var time = cheerPeriod * 10000 //* 3600
+  if (process.env.NODE_ENV === 'development') {
+    time = cheerPeriod * 10000
+  }
+  log.info('cheerPeriod :' + cheerPeriod)
+  intervalId = setInterval(() => {
+    startCheer()
+  }, time)
+  log.info('createSchedule ..', cheerPeriod)
+  // centerWindow()
+}
+
+settings.watch('conf.cheerPeriod', (newValue, oldValue) => {
+  if (newValue !== oldValue) {
+    if (intervalId) {
+      clearInterval(intervalId)
+    }
+    createSchedule(newValue)
+  }
 })
 
-app.on('activate', () => {
-  if (mainWindow === null) {
-    createWindow()
-  }
-})
+createSchedule(settings.get('conf.cheerPeriod', 2))
 
 /**
  * Auto Updater

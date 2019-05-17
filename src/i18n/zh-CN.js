@@ -17,7 +17,7 @@ export const appMenu = {
   },
   tray: {
     cheerNow: '立刻鼓励下！',
-    targetsex: '倾向',
+    targetsex: '喜好',
     targetsexSubs: {
       all: '通吃',
       male: '猿',
@@ -36,7 +36,7 @@ export const appMenu = {
       l1: 'l1',
       l2: 'l2',
       l3: 'l3',
-      l4: 'l4'
+      l4: '随机'
     },
     isFullScreen: '是否全屏',
     setLanguage: '设置语言',

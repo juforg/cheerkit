@@ -1,6 +1,6 @@
 export const appMenu = {
   app: {
-    about: '关于 %{appName}',
+    about: 'About %{appName}',
     services: {
       title: '服务'
     },
@@ -17,26 +17,26 @@ export const appMenu = {
   },
   tray: {
     cheerNow: 'CheerNow!',
-    targetsex: '倾向',
+    targetsex: 'Interest',
     targetsexSubs: {
-      all: '通吃',
-      male: '猿',
-      female: '媛',
+      all: 'All',
+      male: 'Male\'s',
+      female: 'Female\'s',
       favorite: 'Favorite'
     },
-    cheerPeriod: '鼓励周期',
+    cheerPeriod: 'CheerPeriod',
     cheerPeriodSubs: {
-      hour1: '1小时',
-      hour2: '2小时',
-      hour4: '4小时',
-      hour8: '8小时'
+      hour1: '1hour',
+      hour2: '2hour',
+      hour4: '4hour',
+      hour8: '8hour'
     },
-    cheerLevel: '鼓励等级',
+    cheerLevel: 'CheerLevel',
     cheerLevelSubs: {
       l1: 'l1',
       l2: 'l2',
       l3: 'l3',
-      l4: 'l4'
+      l4: 'Random'
     },
     isFullScreen: '是否全屏',
     setLanguage: '设置语言',

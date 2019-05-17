@@ -9,7 +9,13 @@ class Asset {
   getResourcesUri (sexs = ['all'], level = 'l1') {
     var resources = []
     for (var i in sexs) {
-      resources = resources.concat(this.getImages(sexs[i], level))
+      if (level === 'l4') {
+        resources = resources.concat(this.getImages(sexs[i], 'l1'))
+        resources = resources.concat(this.getImages(sexs[i], 'l2'))
+        resources = resources.concat(this.getImages(sexs[i], 'l3'))
+      } else {
+        resources = resources.concat(this.getImages(sexs[i], level))
+      }
     }
     log.info('random reses:', resources)
     return this.getRandomOne(resources)
@@ -39,11 +45,19 @@ class Asset {
     const result = fs.readdirSync(dirPath)
     result.forEach(function (item, index) {
       const stat = fs.lstatSync(path.join(dirPath, item))
-      if (stat.isFile()) {
+      if (stat.isFile() && !item.startsWith('.')) {
         files.push(path.join(sex, level, item))
       }
     })
     return files
+  }
+
+  getImgSize (relurl) {
+    var str = relurl
+    var len = str.length
+    var tmp1 = str.substr(str.lastIndexOf('_') + 1, len)
+    var tmp2 = tmp1.substr(0, tmp1.lastIndexOf('.'))
+    return tmp2.split('*')
   }
 }
 export default new Asset()
