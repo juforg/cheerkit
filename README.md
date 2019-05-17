@@ -7,15 +7,15 @@ Travis: [![Build Status](https://travis-ci.org/juforg/cheerkit.svg?branch=master
 Appveyor: [![Build status](https://ci.appveyor.com/api/projects/status/hdp6df0ylejmv27j?svg=true)](https://ci.appveyor.com/project/juforg/cheerkit)
 
 # 计划
-[x] 静态图片 jpg
-[x] 动图 gif
-[ ] 视频 mp4
+- [x] 静态图片 jpg
+- [x] 动图 gif
+- [ ] 视频 mp4
 
 # 欢迎投递 鼓励用的资源
 可以是 
-[x] 静态图片 jpg png
-[x] 动图 gif
-[ ] 视频 mp4
+- [x] 静态图片 jpg png
+- [x] 动图 gif
+- [ ] 视频 mp4
 
 #### Build Setup
 
