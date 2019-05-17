@@ -13,7 +13,7 @@ export default {
   name: 'cheer-page',
   data () {
     return {
-      cheerUrl: path.join('static', 'all', 'l2', 'a_l2_gif_字符画-kis_714*400.gif'),
+      cheerUrl: path.join('static', 'all', 'l2', 'a_l2_gif_字符画-kis_714X400.gif'),
       imgwidth: 700,
       imgheight: 390
     }

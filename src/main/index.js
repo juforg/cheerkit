@@ -145,7 +145,7 @@ function initSetting () {
   })
 }
 
-var cheerUrl = path.join('static', 'all', 'l2', 'a_l2_gif_字符画-kis_714*400.gif')
+var cheerUrl = path.join('static', 'all', 'l2', 'a_l2_gif_字符画-kis_714X400.gif')
 var intervalId = 0
 var imgwidth = 714
 var imgheight = 400
