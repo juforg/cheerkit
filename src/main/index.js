@@ -98,7 +98,7 @@ app.on('ready', () => {
     app.setAppUserModelId('vip.appcity.cheerkit')
   }
   tray.init()
-
+  startCheer()
   // if (process.env.NODE_ENV === 'production') {
   autoUpdater.logger = log
   autoUpdater.logger.transports.file.level = 'info'
@@ -159,11 +159,13 @@ function startCheer () {
 
   } else if (process.platform === 'win32') {
   }
+
   setTimeout(() => {
-    // log.info('hide' + Date.now())
+    log.info('hide' + Date.now())
     app.hide()
     mainWindow.minimize()
   }, duration)
+  log.info('start cheer ,duration :%s', duration)
 }
 
 function randomRes () {
@@ -185,7 +187,7 @@ function randomRes () {
     imgwidth = si[0]
     imgheight = si[1]
     if (si.length > 2) {
-      duration = Number(si[2]) * 1000
+      duration = Number(si[2]) * 10000
     }
     mainWindow.setSize(Number(imgwidth) + 15, Number(imgheight) + 15)
     mainWindow.center()
@@ -197,7 +199,7 @@ function randomRes () {
   return duration
 }
 function createSchedule (cheerPeriod) {
-  var time = cheerPeriod * 10000 //* 3600
+  var time = cheerPeriod * 10000 * 3600
   if (process.env.NODE_ENV === 'development') {
     time = cheerPeriod * 10000
   }
@@ -205,7 +207,7 @@ function createSchedule (cheerPeriod) {
   intervalId = setInterval(() => {
     startCheer()
   }, time)
-  log.info('createSchedule ..', cheerPeriod)
+  log.info('createSchedule ..%s intervalId id: %s', cheerPeriod, intervalId)
   // centerWindow()
 }
 
