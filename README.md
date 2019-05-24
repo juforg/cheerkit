@@ -12,6 +12,8 @@ Appveyor: [![Build status](https://ci.appveyor.com/api/projects/status/hdp6df0yl
 - [ ] 视频 mp4
 
 # 欢迎投递 鼓励用的资源
+> 若侵权则删
+
 可以是 
 - [x] 静态图片 jpg png
 - [x] 动图 gif
@@ -37,6 +39,7 @@ npm test
 npm run lint
 
 ```
+
 
 ---
 

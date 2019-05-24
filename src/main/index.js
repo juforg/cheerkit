@@ -129,6 +129,12 @@ app.on('activate', () => {
     randomRes()
     log.info('conf.cheerPeriod', settings.get('conf.cheerPeriod', 2))
   }
+  log.info('activated')
+  setTimeout(() => {
+    log.info('hide' + Date.now())
+    app.hide()
+    mainWindow.minimize()
+  }, 3000)
 })
 
 function initSetting () {
@@ -187,7 +193,7 @@ function randomRes () {
     imgwidth = si[0]
     imgheight = si[1]
     if (si.length > 2) {
-      duration = Number(si[2]) * 10000
+      duration = Number(si[2]) * 1000
     }
     mainWindow.setSize(Number(imgwidth) + 15, Number(imgheight) + 15)
     mainWindow.center()
@@ -199,7 +205,7 @@ function randomRes () {
   return duration
 }
 function createSchedule (cheerPeriod) {
-  var time = cheerPeriod * 10000 * 3600
+  var time = cheerPeriod * 1000 * 3600
   if (process.env.NODE_ENV === 'development') {
     time = cheerPeriod * 10000
   }
