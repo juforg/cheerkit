@@ -8,13 +8,10 @@ import VueI18n from 'vue-i18n'
 import * as enUS from '../i18n/en-US'
 import * as zhCN from '../i18n/zh-CN'
 
-const settings = require('electron-settings')
-const lang = settings.get('conf.lang')
-
 Vue.use(VueI18n)
 
 export default new VueI18n({
-  locale: lang,
+  locale: 'zh-CN',
   messages: {
     'en-US': enUS.appMenu,
     'zh-CN': zhCN.appMenu

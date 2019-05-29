@@ -14,7 +14,7 @@ const rendererConfig = require('./webpack.renderer.config')
 
 let electronProcess = null
 let manualRestart = false
-let hotMiddleware
+let hotMiddleware = null
 
 function logStats (proc, data) {
   let log = ''

@@ -13,12 +13,13 @@ export default {
   name: 'cheer-page',
   data () {
     return {
-      cheerUrl: path.join('static', 'all', 'l2', 'a_l2_gif_字符画-kis_714X400.gif'),
+      cheerUrl: '',
       imgwidth: 700,
       imgheight: 390
     }
   },
   created: function () {
+    log.info('created')
     ipcRenderer.on('change-res', (event, url, w, h) => {
       log.info('change-res---------' + url, w, h)
       if (url) {

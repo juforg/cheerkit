@@ -6,7 +6,7 @@
 
 'use strict'
 
-import { Menu, Tray, shell, app, nativeImage, ipcRenderer } from 'electron'
+import { Menu, Tray, shell, app, nativeImage, ipcMain } from 'electron'
 // import * as util from 'electron-util'
 import i18n from './i18n'
 import path from 'path'
@@ -18,23 +18,14 @@ let tray = null
 const DEFAULT_CHEER_PERIOD = '2' // 默认鼓励周期
 const DEFAULT_CHEER_LEVEL = 'l1' // 默认鼓励级别
 
-// function formatTitle (title) {
-//   if (!title) {
-//     return 'untitled'
-//   }
-//   const maxLen = 30
-//   if (title.length < maxLen) {
-//     return title
-//   }
-//   return title.substr(0, maxLen) + '..'
-// }
 function changeCheerLevel (menuItem, browserWindow, event, val) {
   log.info('changeCheerLevel click', menuItem.label)
   // browserWindow.webContents.send('changeCheerLevel', val)
   settings.set('conf.cheerLevel', val)
 }
 function changeCheerPeriod (menuItem, browserWindow, event, val) {
-  log.info('changeCheerPeriod click', menuItem.label)
+  log.info('changeCheerPeriod click %s', menuItem.label)
+  ipcMain.emit('change-cheer-period', 'conf.cheerPeriod', 'conf.cheerPeriod', val)
   settings.set('conf.cheerPeriod', val)
 }
 
@@ -206,6 +197,7 @@ function createTray () {
   if (process.platform === 'darwin') {
     icon = 'iconTemplate.png'
   }
+  i18n.locale = settings.get('conf.lang')
   tray = new Tray(nativeImage.createFromPath(path.join(__static, 'icons', icon)))
   tray.setToolTip('程序员鼓励师')
   initTray()

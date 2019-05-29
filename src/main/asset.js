@@ -4,6 +4,7 @@
  */
 import fs from 'fs'
 import path from 'path'
+const sizeOf = require('image-size')
 const log = require('electron-log')
 class Asset {
   getResourcesUri (sexs = ['all'], level = 'l1') {
@@ -17,17 +18,9 @@ class Asset {
         resources = resources.concat(this.getImages(sexs[i], level))
       }
     }
-    log.info('random reses:', resources)
+    log.debug('random reses: %s , %s , %s', sexs, level, resources)
     return this.getRandomOne(resources)
   }
-
-  // getImageUri (sex = 'all', level = 'l1') {
-  //   // const type = this.getConfigType()
-  //   // const images
-  //   const images = this.getImages(sex, level)
-  //   const image = this.getRandomOne(images)
-  //   return image
-  // }
 
   getImages (sex, level) {
     const dirPath = path.join(__static, sex, level)
@@ -53,11 +46,45 @@ class Asset {
   }
 
   getImgSize (relurl) {
+    var ret = { 'flag': true }
     var str = relurl
     var len = str.length
-    var tmp1 = str.substr(str.lastIndexOf('_') + 1, len)
-    var tmp2 = tmp1.substr(0, tmp1.lastIndexOf('.'))
-    return tmp2.split('X')
+    if (str.indexOf('__') >= 0) {
+      var tmp1 = str.substr(str.lastIndexOf('__') + 2, len)
+      var tmp2 = tmp1.substr(0, tmp1.lastIndexOf('.'))
+      var arry = tmp2.split('X')
+      switch (arry.length) {
+        case 0:
+          var dimensions = sizeOf(path.join('static', relurl))
+          ret.width = dimensions.width
+          ret.height = dimensions.height
+          break
+        case 1:
+          var tmp = arry[0]
+          if (!isNaN(tmp)) {
+            ret.duration = Number(tmp) * 1000
+          }
+          break
+        case 2:
+          ret.width = Number(arry[0])
+          ret.height = Number(arry[1])
+          break
+        case 3:
+          ret.width = Number(arry[0])
+          ret.height = Number(arry[1])
+          ret.duration = Number(arry[2]) * 1000
+          break
+      }
+    } else {
+      var dimen = sizeOf(path.join(__static, relurl))
+      ret.width = dimen.width
+      ret.height = dimen.height
+    }
+    if (ret.height > 800) {
+      ret.width = Math.round(ret.height / 800 * ret.width)
+      ret.height = 800
+    }
+    return ret
   }
 }
 export default new Asset()

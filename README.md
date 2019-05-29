@@ -1,6 +1,7 @@
 # CheerKit
 
 > 程序员鼓励师programming cheerleaders
+![GitHub All Releases](https://img.shields.io/github/downloads/juforg/cheerkit/total.svg)
 
 Travis: [![Build Status](https://travis-ci.org/juforg/cheerkit.svg?branch=master)](https://travis-ci.org/juforg/cheerkit)
 

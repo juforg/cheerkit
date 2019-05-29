@@ -15,11 +15,14 @@ import Asset from './asset.js'
  */
 if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
+  // require('devtron').install()
+  // const { default: installExtension, VUEJS_DEVTOOLS } = require('electron-devtools-installer')
+  // installExtension(VUEJS_DEVTOOLS)
 }
 
 ebtMain(ipcMain)
 
-var log = require('electron-log')
+const log = require('electron-log')
 
 let mainWindow
 const winURL = process.env.NODE_ENV === 'development'
@@ -27,30 +30,36 @@ const winURL = process.env.NODE_ENV === 'development'
   : `file://${__dirname}/index.html`
 
 const settings = require('electron-settings')
-var shouldQuit = app.makeSingleInstance(function (commandLine, workingDirectory) {
-  // Someone tried to run a second instance, we should focus our window.
-  // 当运行第二个实例时,将会聚焦到myWindow这个窗口
-  if (mainWindow) {
-    if (mainWindow.isMinimized()) mainWindow.restore()
-    mainWindow.focus()
-  }
-  log.warn('not allowed second instance!')
-})
+// const storage = require('electron-json-storage')
+// const Store = require('electron-store')
+// const store = new Store()
 
-if (shouldQuit) {
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) {
+  log.info('gotTheLock:{}', gotTheLock)
   app.quit()
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    log.info('second-instance')
+    // 当运行第二个实例时,将会聚焦到myWindow这个窗口
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
+    }
+  })
 }
-function createWindow () {
+
+function createWindow (w, h) {
   /**
    * Initial window options
    */
 
   mainWindow = new BrowserWindow({
     // alwaysOnTop: true, // 窗口是否永远在别的窗口的上面
-    height: 400,
+    height: h,
     center: true,
     useContentSize: true,
-    width: 714,
+    width: w,
     title: '程序员鼓励师',
     resizable: false,
     // backgroundColor: '#eee',
@@ -71,20 +80,21 @@ function createWindow () {
 
   // app.setName('程序员鼓励师')
   mainWindow.once('ready-to-show', () => {
+    log.debug('ready-to-show')
     mainWindow.show()
   })
 
   mainWindow.on('closed', () => {
     mainWindow = null
   })
-  analytics.setEvent('main', 'start', 'starttime', Date.now())
 }
 app.setLoginItemSettings({
   openAtLogin: true,
   openAsHidden: true
 })
 app.on('ready', () => {
-  createWindow()
+  analytics.setEvent('main', 'start', 'starttime', Date.now())
+  // createWindow()
   if (util.isFirstAppLaunch()) {
     initSetting()
   }
@@ -98,13 +108,16 @@ app.on('ready', () => {
     app.setAppUserModelId('vip.appcity.cheerkit')
   }
   tray.init()
-  startCheer()
-  // if (process.env.NODE_ENV === 'production') {
-  autoUpdater.logger = log
-  autoUpdater.logger.transports.file.level = 'info'
-  autoUpdater.checkForUpdatesAndNotify()
-  // autoUpdater.checkForUpdates()
-  // }
+  if (intervalId) {
+    clearInterval(intervalId)
+  }
+  createSchedule(settings.get('conf.cheerPeriod', 2))
+  if (process.env.NODE_ENV === 'production') {
+    autoUpdater.logger = log
+    autoUpdater.logger.transports.file.level = 'info'
+    autoUpdater.checkForUpdatesAndNotify()
+    autoUpdater.checkForUpdates()
+  }
 })
 
 ipcMain.on('asynchronous-message', (event, arg) => {
@@ -115,6 +128,21 @@ ipcMain.on('synchronous-message', (event, arg1, arg2) => {
   log.info('1 ' + arg1 + arg2)
   event.returnValue = 'pong'
 })
+ipcMain.on('change-cheer-period', (event, ...args) => {
+  log.info('change-cheer-period: %s , %s', args[0], args[1])
+  var key = args[0]
+  var newValue = args[1]
+  var oldValue = settings.get(key)
+  if (newValue !== oldValue) {
+    if (intervalId) {
+      log.debug('clearInterval: %s', intervalId)
+      clearInterval(intervalId)
+    }
+    createSchedule(newValue)
+    settings.set('conf.cheerPeriod', newValue)
+    log.info('recreate schedule ,intervalId: %s', intervalId)
+  }
+})
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -124,16 +152,14 @@ app.on('window-all-closed', () => {
 })
 
 app.on('activate', () => {
-  if (mainWindow === null) {
-    createWindow()
-    randomRes()
-    log.info('conf.cheerPeriod', settings.get('conf.cheerPeriod', 2))
-  }
   log.info('activated')
   setTimeout(() => {
-    log.info('hide' + Date.now())
-    app.hide()
-    mainWindow.minimize()
+    log.info('hide %s', Date.now())
+    if (process.platform !== 'darwin') {
+      app.hide()
+    }
+    mainWindow.hide()
+    // mainWindow.minimize()
   }, 3000)
 })
 
@@ -153,25 +179,31 @@ function initSetting () {
 
 var cheerUrl = path.join('static', 'all', 'l2', 'a_l2_gif_字符画-kis_714X400.gif')
 var intervalId = 0
-var imgwidth = 714
-var imgheight = 400
 
 function startCheer () {
-  log.info('show' + Date.now())
   var duration = randomRes()
-  app.show()
+  log.info('[%s]show   %s', mainWindow.id, Date.now())
+  if (process.platform !== 'darwin') {
+    app.show()
+  }
   mainWindow.restore()
+  mainWindow.flashFrame(true)
   if (process.platform === 'darwin') {
 
   } else if (process.platform === 'win32') {
+
   }
 
-  setTimeout(() => {
-    log.info('hide' + Date.now())
+  setTimeout(hideapp, duration)
+  log.info('[%s]start cheer ,duration : %s', mainWindow.id, duration)
+}
+function hideapp () {
+  log.info('[%s]hide app %s', mainWindow.id, Date.now())
+  if (process.platform !== 'darwin') {
     app.hide()
-    mainWindow.minimize()
-  }, duration)
-  log.info('start cheer ,duration :%s', duration)
+  }
+  mainWindow.hide()
+  // mainWindow.minimize()
 }
 
 function randomRes () {
@@ -184,49 +216,40 @@ function randomRes () {
       sexs.push(key)
     }
   }
+  log.info('conf.targetsexSubs: %s ,%s', targetsexSubs, sexs)
   var relurl = Asset.getResourcesUri(sexs, cheerLevel)
   if (relurl) {
     cheerUrl = path.join('static', relurl)
-    log.info('cheerurl:' + cheerUrl)
+    log.info('cheerurl: %s', cheerUrl)
     var si = Asset.getImgSize(relurl)
-    // log.info('si:' + si[0])
-    imgwidth = si[0]
-    imgheight = si[1]
-    if (si.length > 2) {
-      duration = Number(si[2]) * 1000
+    if (si.duration) {
+      duration = si.duration
     }
-    mainWindow.setSize(Number(imgwidth) + 15, Number(imgheight) + 15)
+
+    if (mainWindow == null) {
+      createWindow(si.width, si.height)
+    }
+    mainWindow.setSize(si.width + 15, si.height + 15)
     mainWindow.center()
+    log.info('image size : %s | %s', si.width, si.height)
     // log.info('image size :' + imgwidth + '|' + imgheight)
-    mainWindow.webContents.send('change-res', cheerUrl, imgwidth, imgheight)
+    mainWindow.webContents.send('change-res', cheerUrl, si.width, si.height)
     // mainWindow.webContents.reload()
   }
   analytics.setEvent('main', 'cheerup', 'cheerpage', relurl)
   return duration
 }
 function createSchedule (cheerPeriod) {
-  var time = cheerPeriod * 1000 * 3600
+  var time = cheerPeriod * 1000 * 360
   if (process.env.NODE_ENV === 'development') {
     time = cheerPeriod * 10000
   }
-  log.info('cheerPeriod :' + cheerPeriod)
+  log.info('cheerPeriod :%s', time)
   intervalId = setInterval(() => {
     startCheer()
   }, time)
-  log.info('createSchedule ..%s intervalId id: %s', cheerPeriod, intervalId)
-  // centerWindow()
+  log.info('createSchedule ..%s intervalId id: %s', time, intervalId)
 }
-
-settings.watch('conf.cheerPeriod', (newValue, oldValue) => {
-  if (newValue !== oldValue) {
-    if (intervalId) {
-      clearInterval(intervalId)
-    }
-    createSchedule(newValue)
-  }
-})
-
-createSchedule(settings.get('conf.cheerPeriod', 2))
 
 /**
  * Auto Updater
@@ -237,5 +260,6 @@ createSchedule(settings.get('conf.cheerPeriod', 2))
  */
 
 autoUpdater.on('update-downloaded', () => {
+  log.info('update-downloaded')
   autoUpdater.quitAndInstall()
 })
