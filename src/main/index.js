@@ -65,8 +65,8 @@ const createWindow = () => {
     // alwaysOnTop: true, // 窗口是否永远在别的窗口的上面
     // height: h,
     // width: w,
-    // center: true,
-    // useContentSize: true,
+    center: true,
+    useContentSize: true,
     // title: '程序员鼓励师',
     resizable: false,
     // backgroundColor: '#eee',
@@ -74,7 +74,7 @@ const createWindow = () => {
     frame: false,
     // maximizable: false,
     // minimizable: false,
-    // autoHideMenuBar: true,
+    autoHideMenuBar: true,
     fullscreenable: false,
     // vibrancy: 'ultra-dark',
     // skipTaskbar: true,
@@ -199,7 +199,7 @@ function startCheer () {
   var duration = randomRes()
   // mainWindow.flashFrame(true)
   if (process.platform === 'darwin') {
-    app.show()
+    // app.show()
   } else if (process.platform === 'win32') {
 
   }

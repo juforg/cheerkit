@@ -1,12 +1,10 @@
 # CheerKit
 
-> 程序员鼓励师programming cheerleaders]
+> 程序员鼓励师 programming cheerleaders
 
-![GitHub All Releases](https://img.shields.io/github/downloads/juforg/cheerkit/total.svg)
-
-Travis: [![Build Status](https://travis-ci.org/juforg/cheerkit.svg?branch=master)](https://travis-ci.org/juforg/cheerkit)
-
-Appveyor: [![Build status](https://ci.appveyor.com/api/projects/status/hdp6df0ylejmv27j?svg=true)](https://ci.appveyor.com/project/juforg/cheerkit)
+![GitHub All Releases](https://img.shields.io/github/downloads/juforg/cheerkit/total.svg) [![Build Status](https://travis-ci.org/juforg/cheerkit.svg?branch=master)](https://travis-ci.org/juforg/cheerkit) [![Build status](https://ci.appveyor.com/api/projects/status/hdp6df0ylejmv27j?svg=true)](https://ci.appveyor.com/project/juforg/cheerkit)
+## 描述
+定时提醒弹框提醒
 
 # 计划
 - [x] 静态图片 jpg
