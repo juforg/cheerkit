@@ -261,7 +261,7 @@ function createSchedule (cheerPeriod) {
   if (intervalId) {
     clearInterval(intervalId)
   }
-  var time = cheerPeriod * 1000 * 360
+  var time = cheerPeriod * 1000 * 3600
   if (process.env.NODE_ENV === 'development') {
     time = cheerPeriod * 10000
   }
