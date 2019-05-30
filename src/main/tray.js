@@ -7,7 +7,6 @@
 'use strict'
 
 import { Menu, Tray, shell, app, nativeImage, ipcMain } from 'electron'
-// import * as util from 'electron-util'
 import i18n from './i18n'
 import path from 'path'
 
@@ -197,7 +196,9 @@ function createTray () {
   if (process.platform === 'darwin') {
     icon = 'iconTemplate.png'
   }
-  i18n.locale = settings.get('conf.lang')
+  if (settings.has('conf.lang')) {
+    i18n.locale = settings.get('conf.lang')
+  }
   tray = new Tray(nativeImage.createFromPath(path.join(__static, 'icons', icon)))
   tray.setToolTip('程序员鼓励师')
   initTray()
@@ -208,4 +209,3 @@ export default {
     createTray()
   }
 }
-

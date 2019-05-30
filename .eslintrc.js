@@ -8,7 +8,7 @@ module.exports = {
     browser: true,
     node: true
   },
-  extends: 'vue',
+  extends: 'standard',
   globals: {
     __static: true
   },

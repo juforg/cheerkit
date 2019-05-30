@@ -1,6 +1,7 @@
 # CheerKit
 
-> 程序员鼓励师programming cheerleaders
+> 程序员鼓励师programming cheerleaders]
+
 ![GitHub All Releases](https://img.shields.io/github/downloads/juforg/cheerkit/total.svg)
 
 Travis: [![Build Status](https://travis-ci.org/juforg/cheerkit.svg?branch=master)](https://travis-ci.org/juforg/cheerkit)
@@ -18,7 +19,7 @@ Appveyor: [![Build status](https://ci.appveyor.com/api/projects/status/hdp6df0yl
 可以是 
 - [x] 静态图片 jpg png
 - [x] 动图 gif
-- [ ] 视频 mp4
+- [ ] 视频 mp4 未来支持
 
 #### Build Setup
 

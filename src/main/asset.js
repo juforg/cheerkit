@@ -81,7 +81,7 @@ class Asset {
       ret.height = dimen.height
     }
     if (ret.height > 800) {
-      ret.width = Math.round(ret.height / 800 * ret.width)
+      ret.width = Math.round(800 / ret.height * ret.width)
       ret.height = 800
     }
     return ret

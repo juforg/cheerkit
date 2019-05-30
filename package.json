@@ -23,6 +23,8 @@
     "pack": "npm run pack:main && npm run pack:renderer",
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
+    "test": "npm run unit && npm run e2e",
+    "unit": "karma start test/unit/karma.conf.js",
     "postinstall": "npm run lint:fix",
     "publish": "electron-builder --publish always",
     "release": "electron-builder --publish always"
@@ -93,7 +95,6 @@
     "electron-google-analytics": "^0.1.0",
     "electron-settings": "^3.2.0",
     "electron-updater": "^4.0.6",
-    "electron-util": "^0.11.0",
     "image-size": "^0.7.4",
     "node-machine-id": "^1.1.10",
     "vue": "^2.5.16",
@@ -101,10 +102,9 @@
     "vue-i18n": "^8.10.0",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",
-    "vuex-electron": "^1.0.0"
+    "vuex-electron": "^1.0.3"
   },
   "devDependencies": {
-    "ajv": "^6.5.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.3",
     "babel-loader": "^7.1.4",
@@ -129,7 +129,6 @@
     "electron-log": "^3.0.5",
     "eslint": "^4.19.1",
     "eslint-config-standard": "^11.0.0",
-    "eslint-config-vue": "^2.0.2",
     "eslint-friendly-formatter": "^4.0.1",
     "eslint-loader": "^2.0.0",
     "eslint-plugin-html": "^4.0.3",
@@ -137,7 +136,6 @@
     "eslint-plugin-node": "^6.0.1",
     "eslint-plugin-promise": "^3.8.0",
     "eslint-plugin-standard": "^3.1.0",
-    "eslint-plugin-vue": "^5.2.2",
     "file-loader": "^1.1.11",
     "html-webpack-plugin": "^3.2.0",
     "inject-loader": "^4.0.1",

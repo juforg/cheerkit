@@ -1,13 +1,20 @@
 'use strict'
 
-import { app, BrowserWindow, ipcMain } from 'electron'
+import {
+  app,
+  BrowserWindow,
+  // globalShortcut,
+  // Notification,
+  // systemPreferences,
+  ipcMain
+} from 'electron'
 
 import tray from './tray'
 import path from 'path'
 import { ebtMain } from 'electron-baidu-tongji'
 import analytics from './analyticsProvider'
-import * as util from 'electron-util'
 import { autoUpdater } from 'electron-updater'
+import pkg from '../../package.json'
 import Asset from './asset.js'
 /**
  * Set `__static` path to static files in production
@@ -15,9 +22,9 @@ import Asset from './asset.js'
  */
 if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
-  // require('devtron').install()
-  // const { default: installExtension, VUEJS_DEVTOOLS } = require('electron-devtools-installer')
-  // installExtension(VUEJS_DEVTOOLS)
+}
+if (process.env.DEBUG_ENV === 'debug') {
+  global.__static = require('path').join(__dirname, '../../static').replace(/\\/g, '\\\\')
 }
 
 ebtMain(ipcMain)
@@ -49,31 +56,37 @@ if (!gotTheLock) {
   })
 }
 
-function createWindow (w, h) {
+const createWindow = () => {
   /**
    * Initial window options
    */
 
   mainWindow = new BrowserWindow({
     // alwaysOnTop: true, // 窗口是否永远在别的窗口的上面
-    height: h,
-    center: true,
-    useContentSize: true,
-    width: w,
-    title: '程序员鼓励师',
+    // height: h,
+    // width: w,
+    // center: true,
+    // useContentSize: true,
+    // title: '程序员鼓励师',
     resizable: false,
     // backgroundColor: '#eee',
     show: false,
-    maximizable: false,
-    minimizable: false,
-    autoHideMenuBar: true,
+    frame: false,
+    // maximizable: false,
+    // minimizable: false,
+    // autoHideMenuBar: true,
+    fullscreenable: false,
+    // vibrancy: 'ultra-dark',
     // skipTaskbar: true,
     transparent: true,
     // opacity: 0,
-    titleBarStyle: 'customButtonsOnHover', // hiddenInset customButtonsOnHover
-    // fullscreenable: true,
-    frame: false
-    // icon: path.join(__static, 'icon.png')
+    // titleBarStyle: 'customButtonsOnHover', // hiddenInset customButtonsOnHover
+    // icon: path.join(__static, 'icon.png'),
+    webPreferences: {
+      nodeIntegration: true,
+      nodeIntegrationInWorker: true,
+      backgroundThrottling: false
+    }
   })
 
   mainWindow.loadURL(winURL)
@@ -81,9 +94,10 @@ function createWindow (w, h) {
   // app.setName('程序员鼓励师')
   mainWindow.once('ready-to-show', () => {
     log.debug('ready-to-show')
-    mainWindow.show()
   })
-
+  mainWindow.on('blur', () => {
+    mainWindow.hide()
+  })
   mainWindow.on('closed', () => {
     mainWindow = null
   })
@@ -91,33 +105,6 @@ function createWindow (w, h) {
 app.setLoginItemSettings({
   openAtLogin: true,
   openAsHidden: true
-})
-app.on('ready', () => {
-  analytics.setEvent('main', 'start', 'starttime', Date.now())
-  // createWindow()
-  if (util.isFirstAppLaunch()) {
-    initSetting()
-  }
-  if (process.platform === 'darwin') {
-    // app.dock.setIcon(path.join(__static, 'icons', 'icon.png'))
-    // app.dock.setBadge(app.getName())
-    app.dock.hide()
-    util.enforceMacOSAppLocation()
-  } else
-  if (process.platform === 'win32') {
-    app.setAppUserModelId('vip.appcity.cheerkit')
-  }
-  tray.init()
-  if (intervalId) {
-    clearInterval(intervalId)
-  }
-  createSchedule(settings.get('conf.cheerPeriod', 2))
-  if (process.env.NODE_ENV === 'production') {
-    autoUpdater.logger = log
-    autoUpdater.logger.transports.file.level = 'info'
-    autoUpdater.checkForUpdatesAndNotify()
-    autoUpdater.checkForUpdates()
-  }
 })
 
 ipcMain.on('asynchronous-message', (event, arg) => {
@@ -143,7 +130,32 @@ ipcMain.on('change-cheer-period', (event, ...args) => {
     log.info('recreate schedule ,intervalId: %s', intervalId)
   }
 })
+// app.dock.setIcon(path.join(__static, 'icons', 'icon.png'))
+// app.dock.setBadge(app.getName())
+app.setAppUserModelId(pkg.build.appId)
 
+app.on('ready', () => {
+  analytics.setEvent('main', 'start', 'starttime', Date.now())
+  createWindow()
+  if (settings.has('conf')) {
+    log.info('isFirstAppLaunch initSetting....')
+    initSetting()
+  }
+  if (process.platform === 'darwin') {
+    // app.dock.hide()
+  } else if (process.platform === 'win32') {
+
+  }
+  tray.init()
+
+  createSchedule(settings.get('conf.cheerPeriod', 2))
+  if (process.env.NODE_ENV === 'production') {
+    autoUpdater.logger = log
+    autoUpdater.logger.transports.file.level = 'info'
+    autoUpdater.checkForUpdatesAndNotify()
+    // autoUpdater.checkForUpdates()
+  }
+})
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
@@ -153,16 +165,19 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
   log.info('activated')
-  setTimeout(() => {
-    log.info('hide %s', Date.now())
-    if (process.platform !== 'darwin') {
-      app.hide()
-    }
-    mainWindow.hide()
-    // mainWindow.minimize()
-  }, 3000)
+  if (mainWindow === null) {
+    createWindow()
+  }
+  setTimeout(hideWindow(), 3000)
 })
-
+// app.on('will-quit', () => {
+//   globalShortcut.unregisterAll()
+// })
+// ipcMain.on('autoStart', (evt, val) => {
+//   app.setLoginItemSettings({
+//     openAtLogin: val
+//   })
+// })
 function initSetting () {
   settings.set('conf', {
     targetsexSubs: { all: 'y',
@@ -182,28 +197,32 @@ var intervalId = 0
 
 function startCheer () {
   var duration = randomRes()
-  log.info('[%s]show   %s', mainWindow.id, Date.now())
-  if (process.platform !== 'darwin') {
-    app.show()
-  }
-  mainWindow.restore()
-  mainWindow.flashFrame(true)
+  // mainWindow.flashFrame(true)
   if (process.platform === 'darwin') {
-
+    app.show()
   } else if (process.platform === 'win32') {
 
   }
-
-  setTimeout(hideapp, duration)
-  log.info('[%s]start cheer ,duration : %s', mainWindow.id, duration)
+  showWindow()
+  setTimeout(hideWindow, duration)
+  log.info('[%s]start cheer ,duration : %s, isVisible: %s', mainWindow.id, duration, mainWindow.isVisible())
 }
-function hideapp () {
+const hideWindow = () => {
   log.info('[%s]hide app %s', mainWindow.id, Date.now())
-  if (process.platform !== 'darwin') {
-    app.hide()
+  if (mainWindow.isVisible()) {
+    mainWindow.hide()
   }
-  mainWindow.hide()
+
+  // if (process.platform !== 'darwin') {
+  //   app.hide()
+  // }
   // mainWindow.minimize()
+}
+const showWindow = () => {
+  mainWindow.show()
+  mainWindow.focus()
+  log.info('[%s]show   %s', mainWindow.id, Date.now())
+  // mainWindow.restore()
 }
 
 function randomRes () {
@@ -225,10 +244,9 @@ function randomRes () {
     if (si.duration) {
       duration = si.duration
     }
-
-    if (mainWindow == null) {
-      createWindow(si.width, si.height)
-    }
+    // if (mainWindow == null) {
+    //   createWindow(si.width, si.height)
+    // }
     mainWindow.setSize(si.width + 15, si.height + 15)
     mainWindow.center()
     log.info('image size : %s | %s', si.width, si.height)
@@ -240,6 +258,9 @@ function randomRes () {
   return duration
 }
 function createSchedule (cheerPeriod) {
+  if (intervalId) {
+    clearInterval(intervalId)
+  }
   var time = cheerPeriod * 1000 * 360
   if (process.env.NODE_ENV === 'development') {
     time = cheerPeriod * 10000
