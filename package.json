@@ -1,7 +1,7 @@
 {
   "name": "cheerkit",
   "productName": "程序员鼓励师",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "juforg <juforg@sina.com> (http://blog.appcity.vip)",
   "description": "程序员鼓励师programming cheerleaders",
   "keywords": [
@@ -83,7 +83,10 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "鼓励师"
     },
     "linux": {
       "icon": "build/icons"
@@ -94,7 +97,7 @@
     "electron-baidu-tongji": "^1.0.2",
     "electron-google-analytics": "^0.1.0",
     "electron-settings": "^3.2.0",
-    "electron-updater": "^4.0.6",
+    "electron-updater": "4.0.12",
     "image-size": "^0.7.4",
     "node-machine-id": "^1.1.10",
     "vue": "^2.5.16",

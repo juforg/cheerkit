@@ -37,21 +37,21 @@ const winURL = process.env.NODE_ENV === 'development'
   : `file://${__dirname}/index.html`
 
 const settings = require('electron-settings')
-// const storage = require('electron-json-storage')
-// const Store = require('electron-store')
-// const store = new Store()
 
 const gotTheLock = app.requestSingleInstanceLock()
+log.info('gotTheLock: %s', gotTheLock)
 if (!gotTheLock) {
-  log.info('gotTheLock:{}', gotTheLock)
+  log.info('gotTheLock: %s  quit', gotTheLock)
   app.quit()
 } else {
-  app.on('second-instance', (event, commandLine, workingDirectory) => {
+  app.on('second-instance', (event, argv, workingDirectory) => {
     log.info('second-instance')
     // 当运行第二个实例时,将会聚焦到myWindow这个窗口
     if (mainWindow) {
+      if (!mainWindow.isVisible()) {
+        showWindow()
+      }
       if (mainWindow.isMinimized()) mainWindow.restore()
-      mainWindow.focus()
     }
   })
 }
@@ -106,6 +106,9 @@ app.setLoginItemSettings({
   openAtLogin: true,
   openAsHidden: true
 })
+// app.dock.setIcon(path.join(__static, 'icons', 'icon.png'))
+// app.dock.setBadge(app.getName())
+app.setAppUserModelId(pkg.build.appId)
 
 ipcMain.on('asynchronous-message', (event, arg) => {
   log.info(' 2 ' + arg)
@@ -130,9 +133,12 @@ ipcMain.on('change-cheer-period', (event, ...args) => {
     log.info('recreate schedule ,intervalId: %s', intervalId)
   }
 })
-// app.dock.setIcon(path.join(__static, 'icons', 'icon.png'))
-// app.dock.setBadge(app.getName())
-app.setAppUserModelId(pkg.build.appId)
+ipcMain.on('autoStart', (evt, val) => {
+  log.info('change auto start %s', val)
+  app.setLoginItemSettings({
+    openAtLogin: val
+  })
+})
 
 app.on('ready', () => {
   analytics.setEvent('main', 'start', 'starttime', Date.now())
@@ -170,13 +176,9 @@ app.on('activate', () => {
   }
   setTimeout(hideWindow(), 3000)
 })
+
 // app.on('will-quit', () => {
 //   globalShortcut.unregisterAll()
-// })
-// ipcMain.on('autoStart', (evt, val) => {
-//   app.setLoginItemSettings({
-//     openAtLogin: val
-//   })
 // })
 function initSetting () {
   settings.set('conf', {
@@ -247,7 +249,7 @@ function randomRes () {
     // if (mainWindow == null) {
     //   createWindow(si.width, si.height)
     // }
-    mainWindow.setSize(si.width + 15, si.height + 15)
+    mainWindow.setSize(si.width + 1, si.height + 1)
     mainWindow.center()
     log.info('image size : %s | %s', si.width, si.height)
     // log.info('image size :' + imgwidth + '|' + imgheight)

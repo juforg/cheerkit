@@ -16,6 +16,7 @@ export const appMenu = {
     toggleDevTools: '切换开发者工具'
   },
   tray: {
+    openAtLogin: '开机启动',
     cheerNow: '立刻鼓励下！',
     targetsex: '喜好',
     targetsexSubs: {

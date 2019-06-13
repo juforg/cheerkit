@@ -24,8 +24,8 @@ export default {
       log.info('change-res---------' + url, w, h)
       if (url) {
         this.cheerUrl = url
-        this.imgwidth = w - 10
-        this.imgheight = h - 10
+        this.imgwidth = w - 1
+        this.imgheight = h - 1
       }
     })
   },

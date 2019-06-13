@@ -16,6 +16,7 @@ export const appMenu = {
     toggleDevTools: '切换开发者工具'
   },
   tray: {
+    openAtLogin: 'LanuchAtLogin',
     cheerNow: 'CheerNow!',
     targetsex: 'Interest',
     targetsexSubs: {

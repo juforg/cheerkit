@@ -41,6 +41,16 @@ const initTray = () => {
         type: 'normal',
         enabled: false
       },
+      {
+        label: i18n.t('tray.openAtLogin'),
+        type: 'checkbox',
+        checked: settings.get('conf.openAtLogin', 'y') === 'y',
+        click: (menuItem, browserWindow, event) => {
+          log.info('click', menuItem.label)
+          ipcMain.emit('autoStart', 'conf.openAtLogin', menuItem.checked ? 'y' : 'n')
+          settings.set('conf.openAtLogin', menuItem.checked ? 'y' : 'n')
+        }
+      },
       { type: 'separator' },
       {
         label: i18n.t('tray.targetsex'),
@@ -200,7 +210,7 @@ function createTray () {
     i18n.locale = settings.get('conf.lang')
   }
   tray = new Tray(nativeImage.createFromPath(path.join(__static, 'icons', icon)))
-  tray.setToolTip('程序员鼓励师')
+  tray.setToolTip(app.getName())
   initTray()
 }
 
