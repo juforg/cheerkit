@@ -93,7 +93,7 @@
     }
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "electron-baidu-tongji": "^1.0.2",
     "electron-google-analytics": "^0.1.0",
     "electron-settings": "^3.2.0",
