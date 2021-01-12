@@ -143,7 +143,7 @@ ipcMain.on('autoStart', (evt, val) => {
 app.on('ready', () => {
   analytics.setEvent('main', 'start', 'starttime', Date.now())
   createWindow()
-  if (settings.has('conf')) {
+  if (!settings.has('conf')) {
     log.info('isFirstAppLaunch initSetting....')
     initSetting()
   }

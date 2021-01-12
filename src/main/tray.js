@@ -9,7 +9,7 @@
 import { Menu, Tray, shell, app, nativeImage, ipcMain } from 'electron'
 import i18n from './i18n'
 import path from 'path'
-
+import { autoUpdater } from 'electron-updater'
 const settings = require('electron-settings')
 var log = require('electron-log')
 
@@ -183,6 +183,7 @@ const initTray = () => {
         type: 'normal',
         click: () => {
           // checkUpdate.check()
+          autoUpdater.checkForUpdatesAndNotify()
           console.log('click', 'checkUpdate.check()')
         }
       },

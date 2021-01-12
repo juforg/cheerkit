@@ -37,7 +37,7 @@
   "build": {
     "productName": "程序员鼓励师",
     "appId": "vip.appcity.cheerkit",
-    "copyright": "Copyright © 2019 year ${author}",
+    "copyright": "Copyright © 2021 year ${author}",
     "directories": {
       "output": "build"
     },
