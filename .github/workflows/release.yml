@@ -15,7 +15,8 @@ jobs:
     # Platforms to build on/for
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [macos-latest]
+        # os: [ubuntu-latest, windows-latest, macOS-latest]
 
     steps:
       - name: Check out Git repository
