@@ -3,12 +3,45 @@
 import { app, protocol, BrowserWindow } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
+import {mytray} from './main/tray'
+
 const isDevelopment = process.env.NODE_ENV !== 'production'
+// 自动更新相关
+import { autoUpdater } from "electron-updater"
+const log = require('electron-log')
+
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
+
+const settings = require('electron-settings')
+
+let win
+let winTray
+
+/**
+ * 单一实例
+ */
+const gotTheLock = app.requestSingleInstanceLock()
+log.info('gotTheLock: %s', gotTheLock)
+if (!gotTheLock) {
+  log.info('gotTheLock: %s  quit', gotTheLock)
+  app.quit()
+} else {
+  app.on('second-instance', (event, argv, workingDirectory) => {
+    log.info('second-instance')
+    // 当运行第二个实例时,将会聚焦到myWindow这个窗口
+    if (win) {
+      if (!win.isVisible()) {
+        win.show()
+      }
+      win.focus()
+      if (win.isMinimized()) win.restore()
+    }
+  })
+}
 
 async function createWindow() {
   // Create the browser window.
@@ -31,6 +64,7 @@ async function createWindow() {
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
   }
+  return win
 }
 
 // Quit when all windows are closed.
@@ -60,7 +94,13 @@ app.on('ready', async () => {
       console.error('Vue Devtools failed to install:', e.toString())
     }
   }
-  createWindow()
+  win = createWindow()
+  //托盘
+  winTray = mytray(win)
+  log.info("app ready")
+  log.transports.file.level = "debug"
+  autoUpdater.logger = log
+  autoUpdater.checkForUpdatesAndNotify()
 })
 
 // Exit cleanly on request from parent process in development mode.
