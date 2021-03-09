@@ -6,12 +6,12 @@
 
 'use strict'
 
-import { Menu, Tray, shell, app, nativeImage, ipcMain } from 'electron'
+import { Menu, Tray, shell, app, nativeImage, ipcMain, nativeTheme } from 'electron'
 import i18n from '../i18n'
 import path from 'path'
 import { autoUpdater } from "electron-updater"
 import settings from 'electron-settings'
-const log = require('electron-log')
+import logger from "electron-log"
 const isDev = process.env.NODE_ENV !== 'production'
 
 let tray = null
@@ -19,12 +19,12 @@ const DEFAULT_CHEER_PERIOD = '2' // 默认鼓励周期
 const DEFAULT_CHEER_LEVEL = 'l1' // 默认鼓励级别
 
 function changeCheerLevel (menuItem, browserWindow, event, val) {
-  log.info('changeCheerLevel click', menuItem.label)
+  logger.info('changeCheerLevel click', menuItem.label)
   // browserWindow.webContents.send('changeCheerLevel', val)
   settings.set('conf.cheerLevel', val)
 }
 function changeCheerPeriod (menuItem, browserWindow, event, val) {
-  log.info('changeCheerPeriod click %s', menuItem.label)
+  logger.info('changeCheerPeriod click %s', menuItem.label)
   ipcMain.emit('change-cheer-period', 'conf.cheerPeriod', 'conf.cheerPeriod', val)
   settings.set('conf.cheerPeriod', val)
 }
@@ -45,7 +45,7 @@ const tpl = [
     type: 'checkbox',
     checked: settings.get('conf.openAtLogin', 'y') === 'y',
     click: (menuItem, browserWindow, event) => {
-      log.info('click', menuItem.label)
+      logger.info('click', menuItem.label)
       ipcMain.emit('autoStart', 'conf.openAtLogin', menuItem.checked ? 'y' : 'n')
       settings.set('conf.openAtLogin', menuItem.checked ? 'y' : 'n')
     }
@@ -63,7 +63,7 @@ const tpl = [
         accelerator: 'A',
         registerAccelerator: false,
         click: (menuItem, browserWindow, event) => {
-          log.info('click', menuItem.label)
+          logger.info('click', menuItem.label)
           settings.set('conf.targetsexSubs.all', menuItem.checked ? 'y' : 'n')
         }
       },
@@ -74,7 +74,7 @@ const tpl = [
         accelerator: 'M',
         registerAccelerator: false,
         click: (menuItem, browserWindow, event) => {
-          log.info('click', menuItem.label)
+          logger.info('click', menuItem.label)
           settings.set('conf.targetsexSubs.male', menuItem.checked ? 'y' : 'n')
         }
       },
@@ -85,7 +85,7 @@ const tpl = [
         accelerator: 'F',
         registerAccelerator: false,
         click: (menuItem, browserWindow, event) => {
-          log.info('click', menuItem.label)
+          logger.info('click', menuItem.label)
           settings.set('conf.targetsexSubs.female', menuItem.checked ? 'y' : 'n')
         }
       }
@@ -184,7 +184,7 @@ const tpl = [
       // checkUpdate.check()
       autoUpdater.checkForUpdatesAndNotify()
       console.log('click', 'checkUpdate.check()')
-      log.info('click', 'checkUpdate.check()')
+      logger.info('click', 'checkUpdate.check()')
     }
   },
   { type: 'separator' },
@@ -202,18 +202,25 @@ export const mytray = (win) => {
   let contextMenu = Menu.buildFromTemplate(tpl)
   let icon
   let iconPath
+
   icon = 'icon.png'
   if (process.platform === 'darwin') {
     icon = 'icon.png'
+    if (nativeTheme.shouldUseDarkColors) {
+      icon = 'icon-dark.png'
+    }
+  }else if (process.platform === 'win32') {
+    icon = 'icon.ico'
   }
   if(isDev){
-    iconPath = path.join(__static, 'img', icon)
+    iconPath = path.join(__static, 'img', 'icons', icon)
   }else{
-    iconPath = path.join(__static, 'img', icon)
+    iconPath = path.join(__static, 'img', 'icons', icon)
   }
   if (settings.has('conf.lang')) {
     i18n.locale = settings.get('conf.lang')
   }
+  logger.info("icon path ", iconPath)
   tray = new Tray(nativeImage.createFromPath(iconPath))
   tray.setToolTip(app.getName())
   tray.setContextMenu(contextMenu)
@@ -221,6 +228,6 @@ export const mytray = (win) => {
   tray.on('double-click',function(){
     win.show()
   })
-  log.info("tray init finished ！ ")
+  logger.info("tray init finished ！ ")
   return tray
 }

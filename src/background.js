@@ -4,12 +4,15 @@ import { app, protocol, BrowserWindow } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import {mytray} from './main/tray'
+// import startOnBoot from './main/startOnBoot'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 // 自动更新相关
 import { autoUpdater } from "electron-updater"
-const log = require('electron-log')
-
+import logger from "electron-log"
+import electronDebug from "electron-debug"
+import path from "path"
+electronDebug()
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -25,13 +28,13 @@ let winTray
  * 单一实例
  */
 const gotTheLock = app.requestSingleInstanceLock()
-log.info('gotTheLock: %s', gotTheLock)
+logger.info('gotTheLock: %s', gotTheLock)
 if (!gotTheLock) {
-  log.info('gotTheLock: %s  quit', gotTheLock)
+  logger.info('gotTheLock: %s  quit', gotTheLock)
   app.quit()
 } else {
   app.on('second-instance', (event, argv, workingDirectory) => {
-    log.info('second-instance')
+    logger.info('second-instance')
     // 当运行第二个实例时,将会聚焦到myWindow这个窗口
     if (win) {
       if (!win.isVisible()) {
@@ -52,7 +55,12 @@ async function createWindow() {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION
-    }
+    },
+    // 固定宽高
+    resizable: true,
+    // 边框隐藏
+    frame: true,
+    icon: path.join(__static,'img', 'icons', 'icon.png')
   })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -87,6 +95,8 @@ app.on('activate', () => {
 // Some APIs can only be used after this event occurs.
 app.on('ready', async () => {
   if (isDevelopment && !process.env.IS_TEST) {
+    // Disable security warnings
+    process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true
     // Install Vue Devtools
     try {
       await installExtension(VUEJS_DEVTOOLS)
@@ -97,10 +107,13 @@ app.on('ready', async () => {
   win = createWindow()
   //托盘
   winTray = mytray(win)
-  log.info("app ready")
-  log.transports.file.level = "debug"
-  autoUpdater.logger = log
-  autoUpdater.checkForUpdatesAndNotify()
+  logger.info("app ready")
+  if (process.env.NODE_ENV === 'production') {
+    autoUpdater.logger = logger
+    autoUpdater.logger.transports.file.level = 'info'
+    autoUpdater.checkForUpdatesAndNotify()
+    // autoUpdater.checkForUpdates()
+  }
 })
 
 // Exit cleanly on request from parent process in development mode.
@@ -117,3 +130,7 @@ if (isDevelopment) {
     })
   }
 }
+
+/**
+ * 自动启动
+ */
