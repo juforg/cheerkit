@@ -7,7 +7,7 @@
 'use strict'
 
 import { Menu, Tray, shell, app, nativeImage, ipcMain, nativeTheme } from 'electron'
-import i18n from '../i18n'
+import i18n from '../plugins/i18n'
 import path from 'path'
 import { autoUpdater } from "electron-updater"
 import settings from 'electron-settings'
@@ -39,6 +39,14 @@ const tpl = [
     label: app.getVersion(),
     type: 'normal',
     enabled: false
+  },
+  {
+    label: i18n.t('tray.cheerNow'),
+    type: 'normal',
+    click: (menuItem, browserWindow, event) => {
+      logger.info('click', menuItem.label)
+      ipcMain.emit('start-cheer')
+    }
   },
   {
     label: i18n.t('tray.openAtLogin'),
@@ -198,7 +206,7 @@ const tpl = [
   }
 ]
 
-export const mytray = (win) => {
+export const initTray = (win) => {
   let contextMenu = Menu.buildFromTemplate(tpl)
   let icon
   let iconPath
@@ -222,7 +230,9 @@ export const mytray = (win) => {
   }
   logger.info("icon path ", iconPath)
   tray = new Tray(nativeImage.createFromPath(iconPath))
+  // 设置此托盘图标的悬停提示内容
   tray.setToolTip(app.getName())
+  // 设置此图标的上下文菜单
   tray.setContextMenu(contextMenu)
   // 双击 托盘图标 打开窗口
   tray.on('double-click',function(){

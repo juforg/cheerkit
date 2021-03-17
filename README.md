@@ -91,3 +91,5 @@ npm run lint
 - https://github.com/hilanmiao/Demo-Electron
 - https://github.com/hilanmiao/LanMiaoDesktop
 - https://github.com/fiahfy/picty
+- https://zhuanlan.zhihu.com/p/338046072
+- https://github.com/lei4519/remind-rest

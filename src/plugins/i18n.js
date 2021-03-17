@@ -5,8 +5,8 @@
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 
-import * as enUS from './i18n/en-US'
-import * as zhCN from './i18n/zh-CN'
+import * as enUS from '../i18n/en-US'
+import * as zhCN from '../i18n/zh-CN'
 
 Vue.use(VueI18n)
 

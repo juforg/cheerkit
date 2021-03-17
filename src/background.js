@@ -1,18 +1,19 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
-import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
+import { app, protocol, ipcMain, BrowserWindow } from 'electron'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-import {mytray} from './main/tray'
+import {initTray} from './main/tray'
+import {createMainWin} from './main/mainWindow'
+import {initSchedule, cheerNow, stopSchedule} from './main/scheduleCheer'
 // import startOnBoot from './main/startOnBoot'
-
-const isDevelopment = process.env.NODE_ENV !== 'production'
 // 自动更新相关
 import { autoUpdater } from "electron-updater"
 import logger from "electron-log"
 import electronDebug from "electron-debug"
 import path from "path"
-electronDebug()
+
+const isDevelopment = process.env.NODE_ENV !== 'production'
+// electronDebug()
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -22,7 +23,8 @@ protocol.registerSchemesAsPrivileged([
 const settings = require('electron-settings')
 
 let win
-let winTray
+let cheerWin
+let myTray
 
 /**
  * 单一实例
@@ -40,39 +42,10 @@ if (!gotTheLock) {
       if (!win.isVisible()) {
         win.show()
       }
-      win.focus()
       if (win.isMinimized()) win.restore()
+      win.focus()
     }
   })
-}
-
-async function createWindow() {
-  // Create the browser window.
-  const win = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      // Use pluginOptions.nodeIntegration, leave this alone
-      // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION
-    },
-    // 固定宽高
-    resizable: true,
-    // 边框隐藏
-    frame: true,
-    icon: path.join(__static,'img', 'icons', 'icon.png')
-  })
-
-  if (process.env.WEBPACK_DEV_SERVER_URL) {
-    // Load the url of the dev server if in development mode
-    await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
-    if (!process.env.IS_TEST) win.webContents.openDevTools()
-  } else {
-    createProtocol('app')
-    // Load the index.html when not in development
-    win.loadURL('app://./index.html')
-  }
-  return win
 }
 
 // Quit when all windows are closed.
@@ -87,7 +60,7 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  if (BrowserWindow.getAllWindows().length === 0) win = createMainWin()
 })
 
 // This method will be called when Electron has finished
@@ -99,14 +72,20 @@ app.on('ready', async () => {
     process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true
     // Install Vue Devtools
     try {
-      await installExtension(VUEJS_DEVTOOLS)
+      installExtension(VUEJS_DEVTOOLS)
     } catch (e) {
       console.error('Vue Devtools failed to install:', e.toString())
     }
   }
-  win = createWindow()
+  win = createMainWin()
   //托盘
-  winTray = mytray(win)
+  myTray = initTray(win)
+  //初始化默认鼓励周期
+  let r = initSchedule(1)
+
+  //鼓励一下！
+  // cheerNow()
+
   logger.info("app ready")
   if (process.env.NODE_ENV === 'production') {
     autoUpdater.logger = logger
@@ -114,6 +93,11 @@ app.on('ready', async () => {
     autoUpdater.checkForUpdatesAndNotify()
     // autoUpdater.checkForUpdates()
   }
+})
+
+app.setLoginItemSettings({
+  // openAtLogin: true, //开机启动
+  openAsHidden: true
 })
 
 // Exit cleanly on request from parent process in development mode.
@@ -130,6 +114,38 @@ if (isDevelopment) {
     })
   }
 }
+
+/**
+ 渲染现场和主线程通信
+ */
+ipcMain.on('open-main-window', () => {
+  if (!win) {
+    win = createMainWin()
+  }
+
+  win.show()
+  win.focus()
+})
+ipcMain.on('start-schedule', (event, arg) => {
+  logger.info(' start-schedule ' + arg)
+  initSchedule(arg)
+  event.reply('start-schedule-replay', 'success')
+})
+
+ipcMain.on('stop-schedule', (event, arg) => {
+  logger.info(' stop-schedule ' + arg)
+  stopSchedule()
+  event.reply('stop-schedule-replay', 'success')
+})
+
+ipcMain.on('start-cheer', (event, arg) => {
+  logger.info(' start-cheer ')
+  cheerNow();
+})
+ipcMain.on('cheerWin-ready', (event, arg) => {
+  logger.info(' cheerWin-ready ')
+  event.sender.send('close-cheer-win', 'success')
+})
 
 /**
  * 自动启动
