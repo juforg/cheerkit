@@ -49,22 +49,22 @@ export function initSchedule(periodType) {
   if(job) job.cancel()
   switch(periodType){
     case 1:
-      rule = '30 * * * * *'
+      rule = '59 59 * * * *'
       break;
     case 2:
-      rule = '1 */2 * * *'
+      rule = '0 0 */2 * * *'
       break;
     case 3:
-      rule = '1 */3 * * *'
+      rule = '0 0 */3 * * *'
       break;
     case 4:
-      rule = '1 */4 * * *'
+      rule = '0 0 */4 * * *'
       break;
     case 6:
-      rule = '1 */6 * * *'
+      rule = '0 0 */6 * * *'
       break;
     case 8:
-      rule = '1 */8 * * *'
+      rule = '0 0 */8 * * *'
       break;
     default:
       rule = new RecurrenceRule()

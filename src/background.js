@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, ipcMain, BrowserWindow } from 'electron'
+import { app, protocol, ipcMain, BrowserWindow, globalShortcut } from 'electron'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import {initTray} from './main/tray'
 import {createMainWin} from './main/mainWindow'
@@ -78,14 +78,17 @@ app.on('ready', async () => {
     }
   }
   win = createMainWin()
-  //托盘
+  //2. 初始化托盘
   myTray = initTray(win)
-  //初始化默认鼓励周期
+  //3. 初始化默认鼓励周期
   let r = initSchedule(1)
 
   //鼓励一下！
   // cheerNow()
-
+  //4. 注册快捷键listener
+  globalShortcut.register('CmdOrCtrl+Shift+C',()=>{
+    ipcMain.emit('start-cheer')
+  })
   logger.info("app ready")
   if (process.env.NODE_ENV === 'production') {
     autoUpdater.logger = logger

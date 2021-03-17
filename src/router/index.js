@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import CheerPage from '../views/CheerPage'
-import Settings from '../views/Settings'
+// import CheerPage from '../views/CheerPage'
+// import Settings from '../views/Settings'
 
 Vue.use(Router)
 
@@ -12,12 +12,12 @@ export default new Router({
     {
       path: '/cheer',
       name: 'cheer',
-      component: CheerPage
+      component: () => import('@/views/CheerPage')
     },
     {
       path: '/settings',
       name: 'settings',
-      component: Settings
+      component: () => import('@/views/Settings')
     },
     {
       path: '*',
