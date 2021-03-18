@@ -18,8 +18,8 @@ export const appMenu = {
   tray: {
     openAtLogin: '开机启动',
     cheerNow: '立刻鼓励下！',
-    targetsex: '喜好',
-    targetsexSubs: {
+    targetSex: '喜好',
+    targetSexSubs: {
       all: '通吃',
       male: '猿',
       female: '媛',
@@ -30,6 +30,7 @@ export const appMenu = {
       hour1: '1小时',
       hour2: '2小时',
       hour4: '4小时',
+      hour6: '6小时',
       hour8: '8小时'
     },
     cheerLevel: '鼓励等级',

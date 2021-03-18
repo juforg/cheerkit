@@ -81,7 +81,9 @@ app.on('ready', async () => {
   //2. 初始化托盘
   myTray = initTray(win)
   //3. 初始化默认鼓励周期
-  let r = initSchedule(1)
+  let savedCheerPeriod = settings.getSync('conf.cheerPeriod')
+  logger.info("saved cheerPeriod: %s", savedCheerPeriod)
+  let r = initSchedule(savedCheerPeriod)
 
   //鼓励一下！
   // cheerNow()
@@ -99,9 +101,12 @@ app.on('ready', async () => {
 })
 
 app.setLoginItemSettings({
-  // openAtLogin: true, //开机启动
+  openAtLogin: true, //开机启动
   openAsHidden: true
 })
+if (process.platform === 'win32') {
+  app.setAppUserModelId(app.getName())
+}
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
@@ -135,10 +140,9 @@ ipcMain.on('close-main-window', (event, arg) => {
   logger.info(' close-main-window ')
   //todo 不展示任务栏
 })
-ipcMain.on('start-schedule', (event, arg) => {
+ipcMain.on('start-schedule', (arg) => {
   logger.info(' start-schedule ' + arg)
   initSchedule(arg)
-  event.reply('start-schedule-replay', 'success')
 })
 
 ipcMain.on('stop-schedule', (event, arg) => {
@@ -155,7 +159,12 @@ ipcMain.on('cheerWin-ready', (event, arg) => {
   logger.info(' cheerWin-ready ')
   event.sender.send('close-cheer-win', 'success')
 })
-
+ipcMain.on('autoStart', (evt, val) => {
+  logger.info('change auto start %s', val)
+  app.setLoginItemSettings({
+    openAtLogin: !!val
+  })
+})
 /**
  * 自动启动
  */

@@ -15,19 +15,27 @@ import logger from "electron-log"
 const isDev = process.env.NODE_ENV !== 'production'
 
 let tray = null
-const DEFAULT_CHEER_PERIOD = '2' // 默认鼓励周期
+const DEFAULT_CHEER_PERIOD = 2 // 默认鼓励周期
 const DEFAULT_CHEER_LEVEL = 'l1' // 默认鼓励级别
 
 function changeCheerLevel (menuItem, browserWindow, event, val) {
   logger.info('changeCheerLevel click', menuItem.label)
   // browserWindow.webContents.send('changeCheerLevel', val)
-  settings.set('conf.cheerLevel', val)
+  settings.setSync('conf.cheerLevel', val)
 }
 function changeCheerPeriod (menuItem, browserWindow, event, val) {
-  logger.info('changeCheerPeriod click %s', menuItem.label)
-  ipcMain.emit('change-cheer-period', 'conf.cheerPeriod', 'conf.cheerPeriod', val)
-  settings.set('conf.cheerPeriod', val)
+  logger.info('changeCheerPeriod click %s %s', menuItem.label, val)
+  ipcMain.emit('start-schedule', val)
+  settings.setSync('conf.cheerPeriod', val)
 }
+let conf = settings.getSync('conf')
+logger.info("saved conf: %s", JSON.stringify(conf))
+let savedTargetSexAll = conf.targetSexSubs.all || 'y'
+let savedTargetSexMale = conf.targetSexSubs.male || 'n'
+let savedTargetSexFemale = conf.targetSexSubs.female || 'n'
+let savedCheerPeriod = conf.cheerPeriod || DEFAULT_CHEER_PERIOD
+let savedCheerLevel = conf.cheerLevel || DEFAULT_CHEER_LEVEL
+let savedOpenAtLogin = conf.openAtLogin || true
 
 const tpl = [
   {
@@ -55,50 +63,50 @@ const tpl = [
   {
     label: i18n.t('tray.openAtLogin'),
     type: 'checkbox',
-    checked: settings.get('conf.openAtLogin', 'y') === 'y',
+    checked: !!savedOpenAtLogin,
     click: (menuItem, browserWindow, event) => {
       logger.info('click', menuItem.label)
-      ipcMain.emit('autoStart', 'conf.openAtLogin', menuItem.checked ? 'y' : 'n')
-      settings.set('conf.openAtLogin', menuItem.checked ? 'y' : 'n')
+      ipcMain.emit('autoStart', event, !!menuItem.checked)
+      settings.setSync('conf.openAtLogin', !!menuItem.checked)
     }
   },
   { type: 'separator' },
   {
-    label: i18n.t('tray.targetsex'),
+    label: i18n.t('tray.targetSex'),
     type: 'submenu',
     submenu: [
       {
-        id: 'targetsexSubs.all',
-        label: i18n.t('tray.targetsexSubs.all'),
+        id: 'targetSexSubs.all',
+        label: i18n.t('tray.targetSexSubs.all'),
         type: 'checkbox',
-        checked: settings.get('conf.targetsexSubs.all', 'y') === 'y',
+        checked: savedTargetSexAll === 'y',
         accelerator: 'A',
         registerAccelerator: false,
         click: (menuItem, browserWindow, event) => {
           logger.info('click', menuItem.label)
-          settings.set('conf.targetsexSubs.all', menuItem.checked ? 'y' : 'n')
+          settings.setSync('conf.targetSexSubs.all', menuItem.checked ? 'y' : 'n')
         }
       },
       {
-        label: i18n.t('tray.targetsexSubs.male'),
+        label: i18n.t('tray.targetSexSubs.male'),
         type: 'checkbox',
-        checked: settings.get('conf.targetsexSubs.male', 'n') === 'y',
+        checked: savedTargetSexMale === 'y',
         accelerator: 'M',
         registerAccelerator: false,
         click: (menuItem, browserWindow, event) => {
           logger.info('click', menuItem.label)
-          settings.set('conf.targetsexSubs.male', menuItem.checked ? 'y' : 'n')
+          settings.setSync('conf.targetSexSubs.male', menuItem.checked ? 'y' : 'n')
         }
       },
       {
-        label: i18n.t('tray.targetsexSubs.female'),
+        label: i18n.t('tray.targetSexSubs.female'),
         type: 'checkbox',
-        checked: settings.get('conf.targetsexSubs.female', 'n') === 'y',
+        checked: savedTargetSexFemale === 'y',
         accelerator: 'F',
         registerAccelerator: false,
         click: (menuItem, browserWindow, event) => {
           logger.info('click', menuItem.label)
-          settings.set('conf.targetsexSubs.female', menuItem.checked ? 'y' : 'n')
+          settings.setSync('conf.targetSexSubs.female', menuItem.checked ? 'y' : 'n')
         }
       }
     ]
@@ -111,7 +119,7 @@ const tpl = [
       {
         label: i18n.t('tray.cheerPeriodSubs.hour1'),
         type: 'radio',
-        checked: settings.get('conf.cheerPeriod', DEFAULT_CHEER_PERIOD) == '1',
+        checked: savedCheerPeriod === 1,
         click: (menuItem, browserWindow, event) => {
           changeCheerPeriod(menuItem, browserWindow, event, 1)
         }
@@ -119,7 +127,7 @@ const tpl = [
       {
         label: i18n.t('tray.cheerPeriodSubs.hour2'),
         type: 'radio',
-        checked: settings.get('conf.cheerPeriod', DEFAULT_CHEER_PERIOD) === '2',
+        checked: savedCheerPeriod === 2,
         click: (menuItem, browserWindow, event) => {
           changeCheerPeriod(menuItem, browserWindow, event, 2)
         }
@@ -127,15 +135,22 @@ const tpl = [
       {
         label: i18n.t('tray.cheerPeriodSubs.hour4'),
         type: 'radio',
-        checked: settings.get('conf.cheerPeriod', DEFAULT_CHEER_PERIOD) == '4',
+        checked: savedCheerPeriod === 4,
         click: (menuItem, browserWindow, event) => {
           changeCheerPeriod(menuItem, browserWindow, event, 4)
+        }
+      },{
+        label: i18n.t('tray.cheerPeriodSubs.hour6'),
+        type: 'radio',
+        checked: savedCheerPeriod === 6,
+        click: (menuItem, browserWindow, event) => {
+          changeCheerPeriod(menuItem, browserWindow, event, 6)
         }
       },
       {
         label: i18n.t('tray.cheerPeriodSubs.hour8'),
         type: 'radio',
-        checked: settings.get('conf.cheerPeriod', DEFAULT_CHEER_PERIOD) == '8',
+        checked: savedCheerPeriod === 8,
         click: (menuItem, browserWindow, event) => {
           changeCheerPeriod(menuItem, browserWindow, event, 8)
         }
@@ -150,7 +165,7 @@ const tpl = [
       {
         label: i18n.t('tray.cheerLevelSubs.l1'),
         type: 'radio',
-        checked: settings.get('conf.cheerLevel', DEFAULT_CHEER_LEVEL) === 'l1',
+        checked: savedCheerLevel === 'l1',
         click: (menuItem, browserWindow, event) => {
           changeCheerLevel(menuItem, browserWindow, event, 'l1')
         }
@@ -158,7 +173,7 @@ const tpl = [
       {
         label: i18n.t('tray.cheerLevelSubs.l2'),
         type: 'radio',
-        checked: settings.get('conf.cheerLevel', DEFAULT_CHEER_LEVEL) === 'l2',
+        checked: savedCheerLevel === 'l2',
         click: (menuItem, browserWindow, event) => {
           changeCheerLevel(menuItem, browserWindow, event, 'l2')
         }
@@ -166,7 +181,7 @@ const tpl = [
       {
         label: i18n.t('tray.cheerLevelSubs.l3'),
         type: 'radio',
-        checked: settings.get('conf.cheerLevel', DEFAULT_CHEER_LEVEL) === 'l3',
+        checked: savedCheerLevel === 'l3',
         click: (menuItem, browserWindow, event) => {
           changeCheerLevel(menuItem, browserWindow, event, 'l3')
         }
@@ -174,7 +189,7 @@ const tpl = [
       {
         label: i18n.t('tray.cheerLevelSubs.l4'),
         type: 'radio',
-        checked: settings.get('conf.cheerLevel', DEFAULT_CHEER_LEVEL) === 'l4',
+        checked: savedCheerLevel === 'l4',
         click: (menuItem, browserWindow, event) => {
           changeCheerLevel(menuItem, browserWindow, event, 'l4')
         }
@@ -230,7 +245,7 @@ export const initTray = (win) => {
     iconPath = path.join(__static, 'img', 'icons', icon)
   }
   if (settings.has('conf.lang')) {
-    i18n.locale = settings.get('conf.lang')
+    i18n.locale = settings.getSync('conf.lang')
   }
   logger.info("icon path ", iconPath)
   tray = new Tray(nativeImage.createFromPath(iconPath))

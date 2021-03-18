@@ -18,8 +18,8 @@ export const appMenu = {
   tray: {
     openAtLogin: 'LanuchAtLogin',
     cheerNow: 'CheerNow!',
-    targetsex: 'Interest',
-    targetsexSubs: {
+    targetSex: 'Interest',
+    targetSexSubs: {
       all: 'All',
       male: 'Male\'s',
       female: 'Female\'s',
@@ -30,6 +30,7 @@ export const appMenu = {
       hour1: '1hour',
       hour2: '2hour',
       hour4: '4hour',
+      hour6: '6hour',
       hour8: '8hour'
     },
     cheerLevel: 'CheerLevel',

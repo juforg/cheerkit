@@ -41,7 +41,7 @@ export const createCheerWin = async (w=800, h=600) => {
   // 请注意，即使是使用 ready-to-show 事件的应用程序，仍建议使用设置 backgroundColor 使应用程序感觉更原生。
   win.once('ready-to-show', () => {
     logger.info('cheer win ready-to-show!')
-    win.show()
+    // win.show()
     ipcRenderer.send("cheerWin-ready")
   })
   return win
