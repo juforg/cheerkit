@@ -33,7 +33,10 @@ const tpl = [
   {
     label: app.getName(),
     type: 'normal',
-    role: 'about'
+    click: (menuItem, browserWindow, event) => {
+      logger.info('click', menuItem.label)
+      ipcMain.emit('open-main-window')
+    }
   },
   {
     label: app.getVersion(),
@@ -43,6 +46,7 @@ const tpl = [
   {
     label: i18n.t('tray.cheerNow'),
     type: 'normal',
+    accelerator: 'CmdOrCtrl+Shift+C',
     click: (menuItem, browserWindow, event) => {
       logger.info('click', menuItem.label)
       ipcMain.emit('start-cheer')
@@ -235,7 +239,7 @@ export const initTray = (win) => {
   // 设置此图标的上下文菜单
   tray.setContextMenu(contextMenu)
   // 双击 托盘图标 打开窗口
-  tray.on('double-click',function(){
+  tray.on('double-click',event => {
     win.show()
   })
   logger.info("tray init finished ！ ")

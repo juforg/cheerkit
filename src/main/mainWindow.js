@@ -1,10 +1,11 @@
-import {BrowserWindow} from 'electron'
+import {BrowserWindow, ipcMain} from 'electron'
 import path from "path"
 import {createProtocol} from 'vue-cli-plugin-electron-builder/lib'
+import logger from "electron-log"
 
-export const createMainWin = async () => {
+export const createMainWin = () => {
   // Create the browser window.
-  const win = new BrowserWindow({
+  let win = new BrowserWindow({
     title: '程序员鼓励师',
     width: 800,
     height: 600,
@@ -22,19 +23,16 @@ export const createMainWin = async () => {
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
-    await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
+    win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
     if (!process.env.IS_TEST) win.webContents.openDevTools()
   } else {
     createProtocol('app')
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
   }
-  win.on('close', (event) => {
-    // if (!trayClose) {
-    //   // 最小化
-    //   win.hide()
-    //   event.preventDefault()
-    // }
+  win.on('closed', (event) => {
+    logger.info('main win closed!')
+    ipcMain.emit('close-main-window')
   })
   return win
 }

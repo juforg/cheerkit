@@ -121,13 +121,19 @@ if (isDevelopment) {
 /**
  渲染现场和主线程通信
  */
-ipcMain.on('open-main-window', () => {
+ipcMain.on('open-main-window', (event, arg) => {
+  logger.info(' open-main-window ')
   if (!win) {
+    logger.info(' 重新创建 main-window ')
     win = createMainWin()
   }
-
   win.show()
   win.focus()
+})
+ipcMain.on('close-main-window', (event, arg) => {
+  win = null
+  logger.info(' close-main-window ')
+  //todo 不展示任务栏
 })
 ipcMain.on('start-schedule', (event, arg) => {
   logger.info(' start-schedule ' + arg)
